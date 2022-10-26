@@ -1,0 +1,21 @@
+{
+  "name": "applebot",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "tsc",
+    "start": "nodemon ./src/bot.ts",
+    "dev": "nodemon"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "@types/node": "^18.11.6",
+    "discord-api-types": "^0.37.14",
+    "discord.js": "^14.6.0",
+    "dotenv": "^16.0.3"
+  }
+}
