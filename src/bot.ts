@@ -3,6 +3,7 @@ import { Queue, Song, Playlist } from "discord-music-player";
 import { Client, IntentsBitField, Message, TextChannel, EmbedBuilder } from "discord.js";
 import { sendLogsAsMessages } from "./functions/sendLogsAsMessages";
 import { sendEmbed } from "./functions/sendEmbed";
+import { getQueue } from "./functions/getQueue";
 const { OpusEncoder } = require('@discordjs/opus');
 const { Player, RepeatMode } = require("discord-music-player");
 require('dotenv').config();
@@ -34,36 +35,37 @@ export const settings = {
             sendLogsAsMessages(client, `Everyone left the Voice Channel, queue ended.`))
         // Emitted when a song was added to the queue.
         .on('songAdd', async (queue: Queue, song: Song) => {
-            console.log(`Song ${song} was added to the queue.`)
-            sendEmbed(client, `Song ${song} was added to the queue.`, song.url, song.name, song.thumbnail)
+            sendLogsAsMessages(client, `Song "${song}" was added to the queue.`)
         })
         // Emitted when a playlist was added to the queue.
-        .on('playlistAdd',  (queue: Queue, playlist: Playlist) => {
-            console.log(`Playlist ${playlist} with ${playlist.songs.length} was added to the queue.`)
-            sendEmbed(client, `Playlist ${playlist} with ${playlist.songs.length} was added to the queue.`, playlist.url, playlist.name, playlist.songs.at(0)?.thumbnail)
+        .on('playlistAdd', async (queue: Queue, playlist: Playlist) => {
+            console.log(`Playlist "${playlist}" with ${playlist.songs.length} was added to the queue.`)
+            sendEmbed(client, `Playlist "${playlist}" with ${playlist.songs.length} was added to the queue.`, playlist.url, playlist.name, playlist.songs.at(0)?.thumbnail)
         })
         // Emitted when there was no more music to play.
-        .on('queueDestroyed',  (queue: Queue) =>
+        .on('queueDestroyed',  async (queue: Queue) =>
             sendLogsAsMessages(client, `The queue was destroyed.`))
         // Emitted when the queue was destroyed (either by ending or stopping).    
-        .on('queueEnd',  (queue: Queue) =>
+        .on('queueEnd',  async (queue: Queue) =>
             sendLogsAsMessages(client, `The queue has ended.`))
         // Emitted when a song changed.
-        .on('songChanged', (queue: Queue, newSong: Song, oldSong: Song) => {
-            console.log(`${newSong} is now playing.`)
-            sendEmbed(client, `${newSong} is now playing.`, newSong.url, newSong.name, newSong.thumbnail)
+        .on('songChanged',  async(queue: Queue, newSong: Song, oldSong: Song) => {
+            console.log(`"${newSong}" is now playing.`)
+            sendEmbed(client, `"${newSong}" is now playing.`, newSong.url, newSong.name, newSong.thumbnail)
         })
         // Emitted when a first song in the queue started playing.
-        .on('songFirst',  (queue: Queue, song: Song) =>
-            sendLogsAsMessages(client, `Started playing ${song}.`))
+        .on('songFirst',  async (queue: Queue, song: Song) => {
+            console.log(`Started playing "${song}".`)
+            sendEmbed(client, `Started playing "${song}".`, song.url, song.name, song.thumbnail)
+        })
         // Emitted when someone disconnected the bot from the channel.
-        .on('clientDisconnect', (queue: Queue) =>
+        .on('clientDisconnect', async (queue: Queue) =>
             sendLogsAsMessages(client, `I was kicked from the Voice Channel, queue ended.`))
         // Emitted when deafenOnJoin is true and the bot was undeafened
-        .on('clientUndeafen', (queue: Queue) =>
+        .on('clientUndeafen', async (queue: Queue) =>
             sendLogsAsMessages(client, `I got undefeanded.`))
         // Emitted when there was an error in runtime
-        .on('error', (error: Error, queue: Queue) => {
+        .on('error', async (error: Error, queue: Queue) => {
             sendLogsAsMessages(client, `Error: ${error} in ${queue.guild.name}`);
         });
 
@@ -133,8 +135,8 @@ export const settings = {
                 guildQueue.shuffle();
             }
         
-            if(command === 'getQueue') {
-                console.log(guildQueue);
+            if(command === 'queue') {
+                getQueue(client, guildQueue);
             }
         
             if(command === 'getVolume') {
