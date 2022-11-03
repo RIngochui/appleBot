@@ -1,7 +1,8 @@
 import { channel } from "diagnostics_channel";
 import { Queue, Song, Playlist } from "discord-music-player";
-import { Client, IntentsBitField, Message, TextChannel } from "discord.js";
+import { Client, IntentsBitField, Message, TextChannel, EmbedBuilder } from "discord.js";
 import { sendLogsAsMessages } from "./functions/sendLogsAsMessages";
+import { sendEmbed } from "./functions/sendEmbed";
 const { OpusEncoder } = require('@discordjs/opus');
 const { Player, RepeatMode } = require("discord-music-player");
 require('dotenv').config();
@@ -18,7 +19,7 @@ export const settings = {
         IntentsBitField.Flags.Guilds,
         IntentsBitField.Flags.GuildMessages,
         IntentsBitField.Flags.MessageContent,
-        IntentsBitField.Flags.GuildVoiceStates
+        IntentsBitField.Flags.GuildVoiceStates,
     ]});
 
     const { Player } = require("discord-music-player");
@@ -32,11 +33,15 @@ export const settings = {
         .on('channelEmpty', async (queue: Queue) =>
             sendLogsAsMessages(client, `Everyone left the Voice Channel, queue ended.`))
         // Emitted when a song was added to the queue.
-        .on('songAdd', async (queue: Queue, song: Song) =>
-            sendLogsAsMessages(client, `Song ${song} was added to the queue.`))
+        .on('songAdd', async (queue: Queue, song: Song) => {
+            console.log(`Song ${song} was added to the queue.`)
+            sendEmbed(client, `Song ${song} was added to the queue.`, song.url, song.name, song.thumbnail)
+        })
         // Emitted when a playlist was added to the queue.
-        .on('playlistAdd',  (queue: Queue, playlist: Playlist) =>
-            sendLogsAsMessages(client, `Playlist ${playlist} with ${playlist.songs.length} was added to the queue.`))
+        .on('playlistAdd',  (queue: Queue, playlist: Playlist) => {
+            console.log(`Playlist ${playlist} with ${playlist.songs.length} was added to the queue.`)
+            sendEmbed(client, `Playlist ${playlist} with ${playlist.songs.length} was added to the queue.`, playlist.url, playlist.name, playlist.songs.at(0)?.thumbnail)
+        })
         // Emitted when there was no more music to play.
         .on('queueDestroyed',  (queue: Queue) =>
             sendLogsAsMessages(client, `The queue was destroyed.`))
@@ -44,8 +49,10 @@ export const settings = {
         .on('queueEnd',  (queue: Queue) =>
             sendLogsAsMessages(client, `The queue has ended.`))
         // Emitted when a song changed.
-        .on('songChanged', (queue: Queue, newSong: Song, oldSong: Song) =>
-            sendLogsAsMessages(client, `${newSong} is now playing.`))
+        .on('songChanged', (queue: Queue, newSong: Song, oldSong: Song) => {
+            console.log(`${newSong} is now playing.`)
+            sendEmbed(client, `${newSong} is now playing.`, newSong.url, newSong.name, newSong.thumbnail)
+        })
         // Emitted when a first song in the queue started playing.
         .on('songFirst',  (queue: Queue, song: Song) =>
             sendLogsAsMessages(client, `Started playing ${song}.`))
